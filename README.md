@@ -16,6 +16,12 @@ It is heavily optimised for usage in high-performance computing (HPC) platforms.
 
 For instructions on how to use *NextClone*, please visit the [user guide](https://phipsonlab.github.io/NextClone/).
 
+How to run on STICR data, go to the folder with bam output if you're using PIP-seq make sure to realign with STARSolo unmapped reads within
+
+You need the STICR whitelist in a specific format that has all 3 possible indices and truncated down 58 bps (minimum length for bit 3 demux)
+
+
+
 <!-- ## Citation -->
 
 <!-- If you use NextClone in your study, please kindly cite our preprint on bioRxiv. -->
