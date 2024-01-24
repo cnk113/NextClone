@@ -26,13 +26,15 @@ To run on 10X STICR data, go to the cellranger with bam output
 If you're using PIP-seq make sure to realign the trimmed barcoded fastqs from PIPSeeker with STARSolo with unmapped reads within the bam
 
 STARSolo example run inside a PIPSeeker output folder:
-"""
+```
 # Assuming out is the pipseeker output folder
 cd out;R1=$(R1=$(ls barcoded_fastqs/*R1*); echo $R1 | sed 's/ /,/g');R2=$(R2=$(ls barcoded_fastqs/*R2*); echo $R2 | sed 's/ /,/g');
 STAR --genomeDir ~/human_GRCh38_optimized_reference_v2_STAR --runThreadN 16 --soloType CB_UMI_Simple --soloCBstart 1 --soloCBlen 16 --soloUMIstart 17 --outSAMattributes CB CR CY GX GN UB UR UY NH HI nM AS --outSAMtype BAM SortedByCoordinate --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts --soloUMIdedup 1MM_CR --soloFeatures Gene SJ GeneFull GeneFull_Ex50pAS GeneFull_ExonOverIntron Velocyto --soloMultiMappers EM --soloCellReadStats Standard --soloCellFilter EmptyDrops_CR --soloUMIfiltering MultiGeneUMI_CR --outSAMunmapped Within --soloBarcodeReadLength 0 --readFilesCommand zcat --limitBAMsortRAM 1775716961230000 --soloCBwhitelist barcodes/barcode_whitelist.txt --soloUMIlen 12 --readFilesIn $R2 $R1 --outFileNamePrefix trimmed_
 
-"""
+```
 
+Once in the bam folder run and modified the nextflow.config file for the STICR whitelist and or output folder run:
+`nextflow run phipsonlab/Nextclone -r main -c ~/NextClone/nextflow.config`
 You need the STICR whitelist in a specific format that has all 3 possible indices and truncated down 58 bps (minimum length for bit 3 demux)
 
 <!-- ## Citation -->
