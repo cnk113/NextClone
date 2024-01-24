@@ -2,9 +2,8 @@
 
 process sc_get_unmapped_reads {
     // Using sambamba
-    module 'sambamba'
     label 'medium_mem'
-
+    
     input:
         path bam_file
 
@@ -20,7 +19,6 @@ process sc_get_unmapped_reads {
 
 process sc_remove_low_qual_reads {
     label 'small_mem'
-    conda "${projectDir}/conda_env/extract_sc_env.yaml"
     
     input:
         path unmapped_bam
@@ -38,7 +36,6 @@ process sc_remove_low_qual_reads {
 
 process sc_retain_reads_with_CB_tag {
     // Using sambamba
-    module 'sambamba'
     label 'medium_mem'
 
     input:
@@ -63,7 +60,6 @@ process sc_retain_reads_with_CB_tag {
 
 process sc_split_unmapped_reads {
     label 'small_mem'
-    conda "${projectDir}/conda_env/extract_sc_env.yaml"
 
     input:
         path unmapped_bam 
@@ -83,6 +79,7 @@ process sc_split_unmapped_reads {
     """
 }
 
+
 process sc_map_unmapped_reads {
     label "${params.mapping_process_profile}"
 
@@ -92,27 +89,35 @@ process sc_map_unmapped_reads {
     output:
         path "${unmapped_fasta.baseName}_reads_barcodes.txt"
 
-    """
+    shell:
+    '''
     #!/usr/bin/bash
+    flexiplex -x "!{params.adapter_5prime}" \
+            -b !{params.barcode_length_chr} \
+            -u "" \
+            -x "!{params.adapter_3prime}" \
+            -f !{params.adapter_edit_distance} \
+            -p !{task.cpus} \
+            !{unmapped_fasta} > trimmed.fa
+    
+    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 flexiplex_barcodes_counts.txt) !{params.clone_barcodes_reference} > intersect.txt
 
     flexiplex \
-            -x "${params.adapter_5prime}" \
-            -b ${params.barcode_length_chr} \
+            -x "!{params.adapter_5prime}" \
+            -b !{params.barcode_length_chr} \
             -u "" \
-            -x "${params.adapter_3prime}" \
-            -f ${params.adapter_edit_distance} \
-            -e ${params.barcode_edit_distance} \
-            -n ${unmapped_fasta.baseName} \
-            -k ${params.clone_barcodes_reference} \
-            -p ${task.cpus} \
-            $unmapped_fasta
-    
-    """
+            -x "!{params.adapter_3prime}" \
+            -f !{params.adapter_edit_distance} \
+            -e !{params.barcode_edit_distance} \
+            -n !{unmapped_fasta.baseName} \
+            -k intersect.txt \
+            -p !{task.cpus} \
+            !{unmapped_fasta}
+    '''
 }
 
 process sc_merge_barcodes {
     label 'small_mem'
-    conda "${projectDir}/conda_env/extract_sc_env.yaml"
 
     input:
         path mapped_reads
