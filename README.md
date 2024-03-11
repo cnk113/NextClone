@@ -37,9 +37,9 @@ You need the STICR whitelist in a specific format that has all 3 possible indice
 
 For convenience I've uploaded to google drive gzipped whitelist, you will need to unzip it. The file is ~21 GB unzipped.
 
-Link: 
+Link: https://drive.google.com/file/d/1aHD0-9VVn06NB9mQP0doKjam-V8f6g5C/view?usp=sharing
 
-Modify the nextflow.config file for the STICR whitelist path and/or output folder run:
+Modify the nextflow.config file for the STICR whitelist path (clone_barcodes_reference) and/or output folder run which is set to current dir:
 
 Depending on the compute availability, modify the regular_mapping parameters for memory and CPU usage.
 
