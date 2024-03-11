@@ -100,7 +100,7 @@ process sc_map_unmapped_reads {
             -p !{task.cpus} \
             !{unmapped_fasta} > trimmed.fa
     
-    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 <(awk '$2 >= 15' flexiplex_barcodes_counts.txt)) !{params.clone_barcodes_reference} > intersect.txt
+    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 <(awk '$2 >= 20' flexiplex_barcodes_counts.txt)) !{params.clone_barcodes_reference} > intersect.txt
 
     flexiplex \
             -x "!{params.adapter_5prime}" \
