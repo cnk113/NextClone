@@ -58,33 +58,51 @@ process sc_retain_reads_with_CB_tag {
     """
 }
 
-process sc_split_unmapped_reads {
+process sc_intersect_unmapped_reads {
     label 'small_mem'
 
     input:
         path unmapped_bam 
 
     output:
-        path "${outdir}/${unmapped_bam.baseName}_unmapped_chunk_*.fasta"
+        tuple path("intersect.txt"), path("${outdir}/${unmapped_bam.baseName}_unmapped_chunk_*.fasta")
 
     script:
-        outdir = "${unmapped_bam.baseName}_unmapped_chunks"
-    """
-    mkdir ${outdir}
+        outdir = "${unmapped_bam.baseName}_unmapped_fasta"
+    shell:
+    '''
+    #!/usr/bin/bash
+    mkdir !{outdir}
+    mkdir unmapped_fasta
     
     sc_split_reads.py \
-        --input_bam_filename ${unmapped_bam} \
-        --outdir ${outdir} \
-        --n_chunks ${params.n_chunks}
-    """
-}
+        --input_bam_filename !{unmapped_bam} \
+        --outdir unmapped_fasta \
+        --n_chunks 1
 
+    sc_split_reads.py \
+        --input_bam_filename !{unmapped_bam} \
+        --outdir !{outdir} \
+        --n_chunks !{params.n_chunks}
+    
+    flexiplex -x "!{params.adapter_5prime}" \
+        -b !{params.barcode_length_chr} \
+        -u "" \
+        -x "!{params.adapter_3prime}" \
+        -f !{params.adapter_edit_distance} \
+        -p !{task.cpus} \
+        unmapped_fasta/!{unmapped_bam.baseName}_unmapped_chunk_0.fasta > barcode_count.txt
+
+    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 <(awk '$2 >= 20' flexiplex_barcodes_counts.txt)) !{params.clone_barcodes_reference} > intersect.txt
+    '''
+}
+    
 
 process sc_map_unmapped_reads {
     label "${params.mapping_process_profile}"
 
     input:
-        path unmapped_fasta
+        tuple path(whitelist), path(unmapped_fasta)
 
     output:
         path "${unmapped_fasta.baseName}_reads_barcodes.txt"
@@ -92,16 +110,6 @@ process sc_map_unmapped_reads {
     shell:
     '''
     #!/usr/bin/bash
-    flexiplex -x "!{params.adapter_5prime}" \
-            -b !{params.barcode_length_chr} \
-            -u "" \
-            -x "!{params.adapter_3prime}" \
-            -f !{params.adapter_edit_distance} \
-            -p !{task.cpus} \
-            !{unmapped_fasta} > trimmed.fa
-    
-    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 <(awk '$2 >= 20' flexiplex_barcodes_counts.txt)) !{params.clone_barcodes_reference} > intersect.txt
-
     flexiplex \
             -x "!{params.adapter_5prime}" \
             -b !{params.barcode_length_chr} \
@@ -110,11 +118,12 @@ process sc_map_unmapped_reads {
             -f !{params.adapter_edit_distance} \
             -e !{params.barcode_edit_distance} \
             -n !{unmapped_fasta.baseName} \
-            -k intersect.txt \
+            -k !{whitelist} \
             -p !{task.cpus} \
             !{unmapped_fasta}
     '''
 }
+
 
 process sc_merge_barcodes {
     label 'small_mem'

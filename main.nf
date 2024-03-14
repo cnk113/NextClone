@@ -15,7 +15,7 @@ include {
     sc_get_unmapped_reads;
     sc_remove_low_qual_reads;
     sc_retain_reads_with_CB_tag;
-    sc_split_unmapped_reads;
+    sc_intersect_unmapped_reads;
     sc_map_unmapped_reads;
     sc_merge_barcodes 
 } from "./modules/extract_sc_clone_barcodes"
@@ -35,13 +35,13 @@ workflow {
     } 
     
     if (params.mode == 'scRNAseq') {
-        ch_unmapped_fastas = Channel.fromPath("${params.scrnaseq_bam_files}/*.bam") | 
+        wl_ch_unmapped_fastas = Channel.fromPath("${params.scrnaseq_bam_files}/*.bam") | 
             sc_get_unmapped_reads |
             sc_remove_low_qual_reads |
             sc_retain_reads_with_CB_tag |
-            sc_split_unmapped_reads
+	    sc_intersect_unmapped_reads 
         
-        ch_mapped_fastas = sc_map_unmapped_reads(ch_unmapped_fastas[0].flatten())
+	ch_mapped_fastas = sc_map_unmapped_reads(wl_ch_unmapped_fastas.transpose().view())
         sc_merge_barcodes(ch_mapped_fastas.collect())
     }
 }
