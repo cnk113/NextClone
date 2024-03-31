@@ -93,7 +93,7 @@ process sc_intersect_unmapped_reads {
         -p !{task.cpus} \
         unmapped_fasta/!{unmapped_bam.baseName}_unmapped_chunk_0.fasta > barcode_count.txt
 
-    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 <(awk '$2 >= 20' flexiplex_barcodes_counts.txt)) !{params.clone_barcodes_reference} > intersect.txt
+    awk 'NR==FNR { lines[$0]=1; next } $0 in lines' <(cut -f1 <(awk '$2 >= 10' flexiplex_barcodes_counts.txt)) !{params.clone_barcodes_reference} > intersect.txt
     '''
 }
     
