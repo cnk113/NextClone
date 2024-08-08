@@ -12,7 +12,7 @@ Both workflows are highly modular and adaptable, with software that can easily b
 and with parameters that can be tailored through the nextflow.config file to suit diverse needs.
 It is heavily optimised for usage in high-performance computing (HPC) platforms.
 
-# Will not work on HPC anymore based on current Nextflow config
+# Will not work on HPC/SLURM anymore based on current Nextflow config
 
 ## Documentation to running on 10x/PIP-seq data
 
@@ -39,13 +39,13 @@ For convenience I've uploaded to google drive gzipped whitelist, you will need t
 
 Link: https://drive.google.com/file/d/1FqhcDpYlQ1qbT5pK__skXZ3N3QCrm1-T/view?usp=sharing
 
-Modify the nextflow.config file for the STICR whitelist path (clone_barcodes_reference) and/or output folder run which is set to current dir:
+Modify the nextflow.config file for the STICR whitelist path (clone_barcodes_reference) and/or output folder run which is set to current dir where you run the nextflow run command:
 
 Depending on the compute availability, modify the regular_mapping parameters for memory and CPU usage.
 
 Run once in the bam/cellranger out folder (here it assumes NextClone is in home dir):
 
-`nextflow run ~/NextClone/main.nf -r main -c ~/NextClone/nextflow.config`
+`nextflow run ~/NextClone/main.nf -c ~/NextClone/nextflow.config`
 
 
 <!-- ## Citation -->
